@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"io/ioutil"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/atotto/clipboard"
 )
@@ -32,8 +34,29 @@ func (s *Snippet) getMode() (mode, error) {
 	return 0, fmt.Errorf("invalid snippet mode")
 }
 
+func expandTilde(path string) (string, error) {
+	if !strings.HasPrefix(path, "~") {
+		return path, nil
+	}
+
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+
+	if path == "~" {
+		return home, err
+	}
+	return filepath.Join(home, path[2:]), err
+}
+
 func (s *Snippet) getContentFromPath() (string, error) {
-	bytes, err := ioutil.ReadFile(s.Path)
+	path, err := expandTilde(s.Path)
+	if err != nil {
+		return "", err
+	}
+
+	bytes, err := ioutil.ReadFile(path)
 	if err != nil {
 		return "", err
 	}
