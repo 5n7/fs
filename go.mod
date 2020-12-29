@@ -3,6 +3,7 @@ module github.com/skmatz/fs
 go 1.15
 
 require (
+	github.com/alecthomas/chroma v0.8.2
 	github.com/atotto/clipboard v0.1.2
 	github.com/kylelemons/godebug v1.1.0 // indirect
 	github.com/manifoldco/promptui v0.8.0

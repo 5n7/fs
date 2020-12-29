@@ -37,7 +37,7 @@ func (c *CLI) SelectSnippet(snippets []fs.Snippet) (*fs.Snippet, error) {
 {{ "ID:" | faint }}	{{ .ID }}
 {{ "Name:" | faint }}	{{ .Name }}
 {{ "Content:" | faint }}
-{{ .Content | head }}
+{{ .ColoredContent | head }}
 `,
 		FuncMap: funcMap,
 	}

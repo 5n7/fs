@@ -27,7 +27,12 @@ func New(path string) (*FS, error) {
 	for i := range fs.Snippets {
 		i := i
 		eg.Go(func() error {
-			return fs.Snippets[i].setContent()
+			if err := fs.Snippets[i].setContent(); err != nil {
+				return err
+			}
+
+			fs.Snippets[i].setColoredContent()
+			return nil
 		})
 	}
 

@@ -1,6 +1,7 @@
 package fs
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"io/ioutil"
@@ -9,6 +10,9 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/alecthomas/chroma/formatters"
+	"github.com/alecthomas/chroma/lexers"
+	"github.com/alecthomas/chroma/styles"
 	"github.com/atotto/clipboard"
 )
 
@@ -18,6 +22,8 @@ type Snippet struct {
 	Content string `toml:"content"`
 	Path    string `toml:"path"`
 	URL     string `toml:"url"`
+
+	ColoredContent string
 }
 
 type mode int
@@ -118,6 +124,40 @@ func (s *Snippet) setContent() error {
 
 	s.Content = content
 	return nil
+}
+
+func (s *Snippet) coloredContent(theme string) string {
+	lexer := lexers.Match(s.Name)
+	if lexer == nil {
+		lexer = lexers.Fallback
+	}
+
+	style := styles.Get(theme)
+	if style == nil {
+		style = styles.Fallback
+	}
+
+	formatter := formatters.Get("terminal256")
+	if formatter == nil {
+		formatter = formatters.Fallback
+	}
+
+	iterator, err := lexer.Tokenise(nil, s.Content)
+	if err != nil {
+		return s.Content
+	}
+
+	var buf bytes.Buffer
+	if err := formatter.Format(&buf, style, iterator); err != nil {
+		return s.Content
+	}
+	return buf.String()
+}
+
+var theme = os.Getenv("FS_THEME")
+
+func (s *Snippet) setColoredContent() {
+	s.ColoredContent = s.coloredContent(theme)
 }
 
 func (s *Snippet) ToClipboard() error {
