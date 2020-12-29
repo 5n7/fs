@@ -83,6 +83,10 @@ func (s *Snippet) getContentFromURL() (string, error) {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode != http.StatusOK {
+		return "", fmt.Errorf("http response not OK: %s", resp.Status)
+	}
+
 	bytes, err := ioutil.ReadAll(resp.Body)
 	if err != nil {
 		return "", err
