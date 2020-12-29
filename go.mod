@@ -9,4 +9,5 @@ require (
 	github.com/naoina/go-stringutil v0.1.0 // indirect
 	github.com/naoina/toml v0.1.1
 	github.com/spf13/cobra v1.1.1
+	golang.org/x/sync v0.0.0-20190423024810-112230192c58
 )
