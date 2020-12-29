@@ -1,8 +1,10 @@
 package fs
 
 import (
+	"context"
 	"fmt"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,6 +17,7 @@ type Snippet struct {
 	Name    string `toml:"name"`
 	Content string `toml:"content"`
 	Path    string `toml:"path"`
+	URL     string `toml:"url"`
 }
 
 type mode int
@@ -22,6 +25,7 @@ type mode int
 const (
 	modeContent mode = iota
 	modePath
+	modeURL
 )
 
 func (s *Snippet) getMode() (mode, error) {
@@ -30,6 +34,9 @@ func (s *Snippet) getMode() (mode, error) {
 	}
 	if s.Path != "" {
 		return modePath, nil
+	}
+	if s.URL != "" {
+		return modeURL, nil
 	}
 	return 0, fmt.Errorf("invalid snippet mode")
 }
@@ -63,6 +70,26 @@ func (s *Snippet) getContentFromPath() (string, error) {
 	return string(bytes), nil
 }
 
+func (s *Snippet) getContentFromURL() (string, error) {
+	req, err := http.NewRequestWithContext(context.Background(), http.MethodGet, s.URL, nil)
+	if err != nil {
+		return "", err
+	}
+
+	client := http.DefaultClient
+	resp, err := client.Do(req)
+	if err != nil {
+		return "", err
+	}
+	defer resp.Body.Close()
+
+	bytes, err := ioutil.ReadAll(resp.Body)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
+}
+
 func (s *Snippet) setContent() error {
 	mode, err := s.getMode()
 	if err != nil {
@@ -75,6 +102,11 @@ func (s *Snippet) setContent() error {
 		content = s.Content
 	case modePath:
 		content, err = s.getContentFromPath()
+		if err != nil {
+			return err
+		}
+	case modeURL:
+		content, err = s.getContentFromURL()
 		if err != nil {
 			return err
 		}
