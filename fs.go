@@ -1,9 +1,7 @@
 package fs
 
 import (
-	"os"
-
-	"github.com/naoina/toml"
+	"github.com/BurntSushi/toml"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -12,14 +10,9 @@ type FS struct {
 }
 
 func New(path string) (*FS, error) {
-	f, err := os.Open(path)
-	if err != nil {
-		return nil, err
-	}
-	defer f.Close()
-
 	var fs FS
-	if err := toml.NewDecoder(f).Decode(&fs); err != nil {
+	_, err := toml.DecodeFile(path, &fs)
+	if err != nil {
 		return nil, err
 	}
 
