@@ -42,6 +42,18 @@ func (c *CLI) Run(opt Options) error {
 		return err
 	}
 
+	fields := snippet.ListTemplateFields()
+	if len(fields) > 0 {
+		data, err := MultiInput(fields)
+		if err != nil {
+			return err
+		}
+
+		if err := snippet.ExecuteTemplate(data); err != nil {
+			return err
+		}
+	}
+
 	switch opt.Mode {
 	case "clipboard":
 		return snippet.ToClipboard()

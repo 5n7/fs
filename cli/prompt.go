@@ -63,3 +63,19 @@ func (c *CLI) SelectSnippet(snippets []fs.Snippet) (*fs.Snippet, error) {
 	}
 	return &snippets[idx], nil
 }
+
+func MultiInput(labels []string) (map[string]string, error) {
+	ans := make(map[string]string)
+	for _, label := range labels {
+		prompt := promptui.Prompt{
+			Label: label,
+		}
+
+		result, err := prompt.Run()
+		if err != nil {
+			return nil, err
+		}
+		ans[label] = result
+	}
+	return ans, nil
+}
